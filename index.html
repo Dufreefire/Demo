@@ -3,30 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CuTools - Portal Game</title>
+    <title>CuTools - Siêu Tốc Báo Cầu</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background: #020617; color: white; margin: 0; padding: 0; overflow: hidden; }
-        .glass { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        body { background: #020617; color: white; margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
+        .glass { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
         
-        /* Menu báo cầu nổi đè lên Game */
+        /* Menu báo cầu nổi - Thiết kế cực đẹp */
         #floating-bot-menu {
             position: fixed;
-            top: 20px;
+            top: 15px;
             left: 50%;
             transform: translateX(-50%);
-            width: 90%;
-            max-width: 400px;
+            width: 92%;
+            max-width: 380px;
             z-index: 9999;
-            display: none; /* Ẩn khi chưa đăng nhập */
+            display: none;
+            border-radius: 24px;
+            padding: 12px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
         }
 
-        .neon-tai { border: 2px solid #00f2ff; box-shadow: 0 0 15px #00f2ff; opacity: 1 !important; }
-        .neon-xiu { border: 2px solid #ff0040; box-shadow: 0 0 15px #ff0040; opacity: 1 !important; }
+        .neon-tai { border: 2px solid #22d3ee !important; box-shadow: 0 0 20px #22d3ee; opacity: 1 !important; transform: scale(1.02); }
+        .neon-xiu { border: 2px solid #ef4444 !important; box-shadow: 0 0 20px #ef4444; opacity: 1 !important; transform: scale(1.02); }
 
-        /* Màn hình Game */
+        /* Game Container */
         #game-container {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -38,102 +41,132 @@
 
         .btn-exit {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 10000;
-            background: rgba(255,255,255,0.1);
-            padding: 10px;
+            bottom: 25px;
+            right: 25px;
+            z-index: 10001;
+            background: rgba(30, 41, 59, 0.8);
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255,255,255,0.2);
         }
+
+        .card-game {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .card-game:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
 
-    <div id="lobby-section" class="p-6 max-w-md mx-auto h-screen flex flex-col justify-center">
-        <div class="text-center mb-10">
-            <h1 class="text-4xl font-black italic text-indigo-500">CUTOOLS<span class="text-white">.FUN</span></h1>
-            <p class="text-slate-500 text-xs mt-2 uppercase tracking-widest">Hệ thống báo cầu tự động</p>
+    <div id="lobby-section" class="p-6 max-w-md mx-auto">
+        <div class="flex items-center gap-3 mb-10 pt-4">
+            <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center font-black shadow-lg shadow-indigo-500/30">Cu</div>
+            <div>
+                <h1 class="text-xl font-black italic tracking-tighter">CUTOOLS<span class="text-indigo-400">.FUN</span></h1>
+                <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Hệ thống AI soi cầu 2026</p>
+            </div>
         </div>
 
-        <div class="glass rounded-[2rem] p-6 space-y-4">
-            <select id="site-key" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-2xl">
-                <option value="https://web.betvip.com">BetVip MD5</option>
-                <option value="https://sum.club">SumClub</option>
-                <option value="https://go88.com">Go88</option>
-            </select>
-            
-            <input type="text" id="bot-user" placeholder="Tên đăng nhập nhà cái" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-2xl">
-            <input type="password" id="bot-pass" placeholder="Mật khẩu nhà cái" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-2xl">
-            
-            <button onclick="activateAndLaunch()" class="w-full bg-indigo-600 p-5 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-indigo-500/20">
-                Đăng nhập & Vào Game
-            </button>
+        <h2 class="text-slate-400 text-[11px] font-bold uppercase mb-4 ml-2">Danh sách nhà cái hỗ trợ</h2>
+        
+        <div class="space-y-4">
+            <div onclick="launchGame('https://web.betvip.com')" class="card-game glass p-4 rounded-[2rem] flex items-center gap-4">
+                <img src="https://i.imgur.com/8Q9Z4Qk.png" class="w-14 h-14 rounded-2xl border border-indigo-500/50 shadow-lg shadow-indigo-500/10">
+                <div class="flex-1">
+                    <h3 class="font-black italic text-white">BetVip MD5</h3>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        <span class="text-[10px] text-emerald-400 font-bold uppercase">92% Win Rate</span>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right text-slate-600 mr-2"></i>
+            </div>
+
+            <div onclick="launchGame('https://sum.club')" class="card-game glass p-4 rounded-[2rem] flex items-center gap-4">
+                <img src="https://i.imgur.com/8856.jpg" class="w-14 h-14 rounded-2xl border border-slate-700">
+                <div class="flex-1">
+                    <h3 class="font-black italic text-white">SumClub</h3>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        <span class="text-[10px] text-emerald-400 font-bold uppercase">88% Win Rate</span>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right text-slate-600 mr-2"></i>
+            </div>
+        </div>
+
+        <div class="mt-10 p-4 rounded-2xl border border-dashed border-slate-800 text-center">
+            <p class="text-[10px] text-slate-600 italic">Hệ thống sẽ tự động quét cầu ngay khi bạn vào Game. Không cần nhập tài khoản.</p>
         </div>
     </div>
 
     <div id="game-container">
         <iframe id="game-iframe" src=""></iframe>
-        <button onclick="exitGame()" class="btn-exit text-white opacity-50 hover:opacity-100">
-            <i class="fas fa-times text-2xl"></i>
+        <button onclick="exitGame()" class="btn-exit text-white">
+            <i class="fas fa-times"></i>
         </button>
     </div>
 
-    <div id="floating-bot-menu" class="glass rounded-3xl p-4 shadow-2xl">
-        <div class="flex justify-between items-center mb-3">
-            <span id="phien-id" class="text-[10px] text-gray-400 font-mono">Phiên: #-------</span>
-            <div class="flex items-center gap-1">
+    <div id="floating-bot-menu" class="glass">
+        <div class="flex justify-between items-center mb-3 px-1">
+            <div class="flex flex-col">
+                <span id="phien-id" class="text-[10px] text-gray-400 font-mono tracking-tighter">PHIÊN: #-------</span>
+                <span class="text-[8px] text-indigo-400 font-bold uppercase tracking-widest">AI Prediction</span>
+            </div>
+            <div class="bg-red-500/20 px-2 py-1 rounded-lg border border-red-500/30 flex items-center gap-2">
                 <span class="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping"></span>
-                <span class="text-[9px] font-bold text-red-500">LIVE SCAN</span>
+                <span class="text-[9px] font-black text-red-500 uppercase tracking-tighter">Live Scan</span>
             </div>
         </div>
-        <div class="flex justify-between gap-3">
-            <div id="box-tai" class="flex-1 py-4 rounded-2xl bg-cyan-900/20 border border-white/5 opacity-20 text-center transition-all duration-300">
-                <span class="text-xl font-black text-cyan-400">TÀI</span>
+
+        <div class="flex justify-between gap-4">
+            <div id="box-tai" class="flex-1 py-4 rounded-2xl bg-cyan-950/20 border border-white/5 opacity-10 text-center transition-all duration-500">
+                <span class="text-2xl font-black text-cyan-400 tracking-widest">TÀI</span>
             </div>
-            <div id="box-xiu" class="flex-1 py-4 rounded-2xl bg-red-900/20 border border-white/5 opacity-20 text-center transition-all duration-300">
-                <span class="text-xl font-black text-red-500">XỈU</span>
+            <div id="box-xiu" class="flex-1 py-4 rounded-2xl bg-red-950/20 border border-white/5 opacity-10 text-center transition-all duration-500">
+                <span class="text-2xl font-black text-red-500 tracking-widest">XỈU</span>
             </div>
         </div>
     </div>
 
     <script>
+        // THAY LINK RENDER CỦA BẠN VÀO ĐÂY
         const socket = io('https://ten-app-cua-ban.onrender.com');
 
-        function activateAndLaunch() {
-            const user = document.getElementById('bot-user').value;
-            const pass = document.getElementById('bot-pass').value;
-            const siteUrl = document.getElementById('site-key').value;
-
-            if(!user || !pass) return alert("Vui lòng nhập tài khoản!");
-
-            // 1. Gửi lệnh cho Bot Backend bắt đầu login ngầm
-            socket.emit('start_bot', { site: siteUrl, user, pass });
-
-            // 2. Chuyển giao diện sang màn hình Game
+        function launchGame(url) {
             document.getElementById('lobby-section').style.display = 'none';
             document.getElementById('game-container').style.display = 'block';
-            document.getElementById('game-iframe').src = siteUrl;
+            document.getElementById('game-iframe').src = url;
             document.getElementById('floating-bot-menu').style.display = 'block';
         }
 
         function exitGame() {
-            if(confirm("Bạn muốn thoát game?")) {
+            if(confirm("Thoát Tool và Game?")) {
                 location.reload();
             }
         }
 
-        // Nhận kết quả từ Bot trả về
+        // Nhận dữ liệu từ Server Bot (Render)
         socket.on('bot_update', (data) => {
-            document.getElementById('phien-id').innerText = `Phiên: #${data.phien}`;
+            document.getElementById('phien-id').innerText = `PHIÊN: #${data.phien}`;
             const bTai = document.getElementById('box-tai');
             const bXiu = document.getElementById('box-xiu');
 
+            // Reset trạng thái
+            bTai.classList.remove('neon-tai');
+            bXiu.classList.remove('neon-xiu');
+            bTai.style.opacity = "0.1";
+            bXiu.style.opacity = "0.1";
+
             if(data.duDoan === 'TAI') {
                 bTai.classList.add('neon-tai');
-                bXiu.classList.remove('neon-xiu');
             } else {
                 bXiu.classList.add('neon-xiu');
-                bTai.classList.remove('neon-tai');
             }
         });
     </script>
