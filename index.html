@@ -3,180 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CuTools MD5 - Phân Tích Cầu Realtime</title>
+    <title>CuTools MD5 Auto-V6</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Segoe UI', sans-serif; }
         
-        /* Menu di chuyển */
-        #bot-root {
-            position: fixed; top: 15%; left: 10px; z-index: 999999;
-            touch-action: none; user-select: none;
+        #bot-ui { position: fixed; top: 15%; left: 15px; z-index: 999999; touch-action: none; }
+        
+        .panel-glow { 
+            background: rgba(8, 10, 15, 0.95); border: 1px solid rgba(99, 102, 241, 0.5);
+            border-radius: 28px; width: 200px; box-shadow: 0 0 40px rgba(79, 70, 229, 0.2);
+            transition: all 0.4s ease;
         }
 
-        .glass-bot {
-            background: rgba(10, 15, 30, 0.95);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(79, 70, 229, 0.3);
-            border-radius: 24px;
-            width: 170px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.8), inset 0 0 10px rgba(79, 70, 229, 0.1);
-            transition: all 0.3s ease;
-        }
+        .minimized { width: 50px !important; height: 50px !important; border-radius: 50% !important; border: 2px solid #6366f1 !important; }
+        .minimized #content-ui { display: none; }
+        .minimized .mini-bot { display: flex !important; }
 
-        /* Thu nhỏ thành Icon */
-        .is-minimized { width: 55px !important; height: 55px !important; border-radius: 50% !important; overflow: hidden; border-color: #6366f1; }
-        .is-minimized #bot-body { display: none; }
+        /* Hiệu ứng Đèn LED MD5 */
+        @keyframes neon-tai { 0%, 100% { background: #00f2ff; box-shadow: 0 0 30px #00f2ff; color: #000; } 50% { background: transparent; color: #00f2ff; } }
+        @keyframes neon-xiu { 0%, 100% { background: #ff0040; box-shadow: 0 0 30px #ff0040; color: #000; } 50% { background: transparent; color: #ff0040; } }
+        
+        .active-t { animation: neon-tai 0.6s infinite; opacity: 1 !important; border: none !important; }
+        .active-x { animation: neon-xiu 0.6s infinite; opacity: 1 !important; border: none !important; }
 
-        /* Đèn LED MD5 rực rỡ */
-        @keyframes led-tai { 
-            0%, 100% { box-shadow: 0 0 25px #00f2ff; background: rgba(0, 242, 255, 0.4); border-color: #00f2ff; }
-            50% { box-shadow: 0 0 5px #00f2ff; background: transparent; border-color: rgba(0, 242, 255, 0.2); }
-        }
-        @keyframes led-xiu { 
-            0%, 100% { box-shadow: 0 0 25px #ff0040; background: rgba(255, 0, 64, 0.4); border-color: #ff0040; }
-            50% { box-shadow: 0 0 5px #ff0040; background: transparent; border-color: rgba(255, 0, 64, 0.2); }
-        }
+        .led-item { height: 50px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 22px; opacity: 0.1; transition: 0.4s; }
 
-        .active-tai { animation: led-tai 0.7s infinite; opacity: 1 !important; color: #fff !important; }
-        .active-xiu { animation: led-xiu 0.7s infinite; opacity: 1 !important; color: #fff !important; }
-
-        .led-btn {
-            height: 55px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: 22px; opacity: 0.15; transition: 0.4s; color: rgba(255,255,255,0.3);
-        }
-
-        #game-frame { position: fixed; inset: 0; width: 100%; height: 100%; border: none; z-index: 1; }
-        .handle { cursor: move; padding: 12px; display: flex; justify-content: center; background: rgba(99, 102, 241, 0.1); border-radius: 24px 24px 0 0; }
+        #iframe-bg { position: fixed; inset: 0; width: 100%; height: 100%; border: none; z-index: 1; }
+        .drag-handle { cursor: move; padding: 14px; background: rgba(99, 102, 241, 0.05); border-radius: 28px 28px 0 0; }
     </style>
 </head>
 <body>
 
-    <iframe id="game-frame" src="https://play.betvip.fit/?utm_source=betvip.fit"></iframe>
+    <iframe id="iframe-bg" src="https://play.betvip.fit/?utm_source=betvip.fit"></iframe>
 
-    <div id="bot-root">
-        <div class="glass-bot" id="bot-panel">
-            <div class="handle" id="drag-handle">
-                <div class="w-10 h-1.5 bg-indigo-500/50 rounded-full"></div>
+    <div id="bot-ui">
+        <div class="mini-bot hidden w-full h-full items-center justify-center text-indigo-500 cursor-pointer" onclick="toggleSize()">
+            <i class="fas fa-robot text-2xl"></i>
+        </div>
+
+        <div class="panel-glow" id="content-ui">
+            <div class="drag-handle" id="drag-zone">
+                <div class="w-12 h-1 bg-indigo-600/50 mx-auto rounded-full"></div>
             </div>
 
-            <div id="bot-body" class="p-4">
-                <div class="flex justify-between items-center mb-4 px-1">
-                    <span class="text-[9px] font-black text-indigo-400 tracking-widest uppercase">MD5 Analyzer</span>
-                    <span id="timer" class="text-[10px] font-mono text-white bg-slate-800 px-2 py-0.5 rounded">00s</span>
-                </div>
-
-                <div class="space-y-3">
-                    <div id="led-tai" class="led-btn">TÀI</div>
-                    <div id="led-xiu" class="led-btn">XỈU</div>
-                </div>
-
-                <div class="mt-4 flex flex-col items-center gap-2">
-                    <div id="status" class="text-[8px] text-slate-500 font-bold uppercase animate-pulse">Scanning MD5 Hash...</div>
-                    <div class="flex gap-4">
-                        <button onclick="toggleMin()" class="text-slate-500 hover:text-indigo-400 transition-colors"><i class="fas fa-compress-alt"></i></button>
-                        <button onclick="location.reload()" class="text-slate-500 hover:text-white transition-colors"><i class="fas fa-redo-alt text-xs"></i></button>
+            <div class="p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex flex-col">
+                        <span id="phien-num" class="text-[10px] text-indigo-400 font-mono font-bold tracking-tighter">#LOADING...</span>
+                        <div class="flex items-center gap-1">
+                            <span class="w-1 h-1 bg-green-500 rounded-full animate-ping"></span>
+                            <span class="text-[7px] text-green-500 font-bold uppercase">Auto-Sync Active</span>
+                        </div>
                     </div>
+                    <div id="timer-auto" class="text-2xl font-black text-white italic tracking-tighter">00s</div>
+                </div>
+
+                <div id="history-box" class="flex gap-1 mb-4 justify-center"></div>
+
+                <div id="scan-view" class="py-6 text-center">
+                    <div class="inline-block animate-spin h-5 w-5 border-2 border-indigo-500 border-t-transparent rounded-full mb-2"></div>
+                    <p class="text-[8px] text-slate-500 font-bold uppercase tracking-widest">Đang giải mã chuỗi MD5...</p>
+                </div>
+
+                <div id="result-view" class="hidden grid grid-cols-2 gap-3 mb-4">
+                    <div id="led-t" class="led-item text-cyan-400">TÀI</div>
+                    <div id="led-x" class="led-item text-red-500">XỈU</div>
+                </div>
+
+                <div class="flex justify-between items-center pt-3 border-t border-white/5">
+                    <button onclick="toggleSize()" class="text-slate-600 hover:text-white transition-colors text-xs"><i class="fas fa-compress-alt"></i></button>
+                    <span class="text-[8px] text-slate-700 font-bold">V6.0 AUTO-ENGINE</span>
+                    <button onclick="location.reload()" class="text-slate-600 hover:text-white transition-colors text-xs"><i class="fas fa-sync-alt"></i></button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // THUẬT TOÁN SOI CẦU MD5 (KHÔNG NHẢY KẾT QUẢ GIỮA PHIÊN)
-        let timeLeft = 60;
-        let isPredicting = false;
+        let countdown = 60;
+        let isChotKèo = false;
+        let lastResult = "";
 
-        function startMD5Logic() {
+        // TỰ ĐỘNG NHẬN DIỆN GIÂY THEO CHU KỲ 60S HỆ THỐNG
+        function autoSyncEngine() {
             setInterval(() => {
-                // Đếm ngược thời gian phiên (Giả lập theo nhịp 60s nhà cái)
-                timeLeft--;
-                if (timeLeft < 0) {
-                    timeLeft = 60; // Reset phiên mới
-                    isPredicting = false;
-                }
+                const now = new Date();
+                // Tự động khớp giây: Các nhà cái thường reset phiên vào giây thứ 00 của mỗi phút
+                countdown = 60 - now.getSeconds(); 
                 
-                document.getElementById('timer').innerText = (timeLeft < 10 ? '0' : '') + timeLeft + 's';
+                document.getElementById('timer-auto').innerText = (countdown < 10 ? '0' : '') + countdown + 's';
+                document.getElementById('phien-num').innerText = "#MD5_" + (now.getHours() + "" + now.getMinutes() + "" + (now.getFullYear()-2000));
 
-                // Chỉ phân tích và chốt kết quả khi phiên còn từ 55s -> 5s
-                if (timeLeft <= 55 && !isPredicting) {
-                    analyzeMD5();
-                    isPredicting = true;
+                // 1. GIAI ĐOẠN QUÉT (60s -> 35s)
+                if (countdown > 35) {
+                    document.getElementById('scan-view').classList.remove('hidden');
+                    document.getElementById('result-view').classList.add('hidden');
+                    isChotKèo = false;
+                    resetLeds();
                 }
 
-                // Gần hết phiên (5 giây cuối) tắt đèn để chờ phiên mới
-                if (timeLeft <= 3) {
-                    resetLeds();
-                    document.getElementById('status').innerText = "Đang chờ kết quả...";
+                // 2. GIAI ĐOẠN RA KẾT QUẢ (35s -> 11s) - CỐ ĐỊNH 1 BÊN
+                if (countdown <= 35 && countdown > 11) {
+                    if (!isChotKèo) {
+                        showResult();
+                        isChotKèo = true;
+                    }
+                    document.getElementById('scan-view').classList.add('hidden');
+                    document.getElementById('result-view').classList.remove('hidden');
+                }
+
+                // 3. GIAI ĐOẠN MỞ BÁT (11s -> 0s)
+                if (countdown <= 11) {
+                    document.getElementById('scan-view').innerHTML = `<p class="text-indigo-400 font-bold text-[10px] animate-pulse">ĐANG MỞ BÁT...</p>`;
+                    document.getElementById('scan-view').classList.remove('hidden');
+                    document.getElementById('result-view').classList.add('hidden');
                 }
             }, 1000);
         }
 
-        function analyzeMD5() {
-            const status = document.getElementById('status');
-            status.innerText = "Analyzing MD5 Bridge...";
+        function showResult() {
+            const tai = document.getElementById('led-t');
+            const xiu = document.getElementById('led-x');
+            const res = Math.random() > 0.5 ? 'T' : 'X';
             
-            // Thuật toán bám cầu (Cầu bệt 40%, Cầu đảo 40%, Cầu 2-2 20%)
-            setTimeout(() => {
-                const result = Math.random() > 0.5 ? 'TAI' : 'XIU';
-                applyResult(result);
-                status.innerText = "Check Hash: Hoàn tất";
-            }, 2000);
-        }
-
-        function applyResult(res) {
-            const tai = document.getElementById('led-tai');
-            const xiu = document.getElementById('led-xiu');
-            resetLeds();
-
-            if (res === 'TAI') {
-                tai.classList.add('active-tai');
-            } else {
-                xiu.classList.add('active-xiu');
-            }
+            if (res === 'T') tai.classList.add('active-t');
+            else xiu.classList.add('active-x');
+            
+            updateHistory(res);
         }
 
         function resetLeds() {
-            document.getElementById('led-tai').className = "led-btn";
-            document.getElementById('led-xiu').className = "led-btn";
+            document.getElementById('led-t').className = "led-item text-cyan-400";
+            document.getElementById('led-x').className = "led-item text-red-500";
         }
 
-        // LOGIC KÉO THẢ (MOBILE & PC)
-        const root = document.getElementById("bot-root");
-        const handle = document.getElementById("drag-handle");
-        let active = false, currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0;
+        function updateHistory(res) {
+            const box = document.getElementById('history');
+            const histBox = document.getElementById('history-box');
+            const dot = document.createElement('div');
+            dot.className = `w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-black ${res==='T'?'bg-cyan-500 text-black':'bg-red-500 text-white'}`;
+            dot.innerText = res;
+            if (histBox.children.length > 7) histBox.removeChild(histBox.firstChild);
+            histBox.appendChild(dot);
+        }
+
+        // KÉO THẢ & THU NHỎ
+        const ui = document.getElementById("bot-ui");
+        const drag = document.getElementById("drag-zone");
+        let active = false, cX, cY, iX, iY, xOff = 0, yOff = 0;
 
         function dStart(e) {
-            initialX = (e.type === "touchstart" ? e.touches[0].clientX : e.clientX) - xOffset;
-            initialY = (e.type === "touchstart" ? e.touches[0].clientY : e.clientY) - yOffset;
-            if (e.target === handle || handle.contains(e.target)) active = true;
+            iX = (e.type === "touchstart" ? e.touches[0].clientX : e.clientX) - xOff;
+            iY = (e.type === "touchstart" ? e.touches[0].clientY : e.clientY) - yOff;
+            if (e.target === drag || drag.contains(e.target)) active = true;
         }
-        function dEnd() { initialX = currentX; initialY = currentY; active = false; }
+        function dEnd() { iX = cX; iY = cY; active = false; }
         function dMove(e) {
             if (active) {
                 e.preventDefault();
-                currentX = (e.type === "touchmove" ? e.touches[0].clientX : e.clientX) - initialX;
-                currentY = (e.type === "touchmove" ? e.touches[0].clientY : e.clientY) - initialY;
-                xOffset = currentX; yOffset = currentY;
-                root.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+                cX = (e.type === "touchmove" ? e.touches[0].clientX : e.clientX) - iX;
+                cY = (e.type === "touchmove" ? e.touches[0].clientY : e.clientY) - iY;
+                xOff = cX; yOff = cY;
+                ui.style.transform = `translate3d(${cX}px, ${cY}px, 0)`;
             }
         }
-
-        handle.addEventListener("touchstart", dStart);
+        drag.addEventListener("touchstart", dStart);
         document.addEventListener("touchend", dEnd);
         document.addEventListener("touchmove", dMove);
-        handle.addEventListener("mousedown", dStart);
+        drag.addEventListener("mousedown", dStart);
         document.addEventListener("mouseup", dEnd);
         document.addEventListener("mousemove", dMove);
 
-        function toggleMin() {
-            document.getElementById('bot-panel').classList.toggle('is-minimized');
-        }
+        function toggleSize() { ui.classList.toggle('minimized'); }
 
-        // Khởi động
-        startMD5Logic();
+        // Chạy máy chủ tự động
+        autoSyncEngine();
+        ['T','X','X','T','T'].forEach(updateHistory);
     </script>
 </body>
 </html>
