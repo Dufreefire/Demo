@@ -2,143 +2,158 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CuTools Pro - Fix Anti-Block</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CuTools Premium - Moving Menu</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #010409; font-family: sans-serif; }
         
-        /* Menu dự đoán nổi (Floating) */
-        #prediction-overlay {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 380px;
-            z-index: 999999; /* Luôn trên cùng */
-            display: none;
-            background: rgba(15, 23, 42, 0.9);
-            backdrop-filter: blur(10px);
-            border: 1.5px solid rgba(255,255,255,0.1);
-            border-radius: 24px;
-            padding: 15px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-        }
-
-        .status-tai { border-color: #00f2ff !important; box-shadow: 0 0 20px #00f2ff; background: rgba(0, 242, 255, 0.1) !important; opacity: 1 !important; }
-        .status-xiu { border-color: #ff0040 !important; box-shadow: 0 0 20px #ff0040; background: rgba(255, 0, 64, 0.1) !important; opacity: 1 !important; }
-
-        /* Nút quay lại để chọn nhà cái khác */
-        #back-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
+        /* Menu di chuyển được */
+        #floating-menu {
+            position: absolute;
+            top: 100px;
+            left: 20px;
+            width: 180px;
             z-index: 999999;
+            cursor: move;
             display: none;
-            background: rgba(0,0,0,0.6);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 50px;
-            border: 1px solid rgba(255,255,255,0.2);
-            font-size: 12px;
-            font-weight: bold;
+            user-select: none;
+            touch-action: none; /* Quan trọng cho mobile */
         }
 
-        /* Lobby */
-        #lobby {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: #020617;
-            padding: 20px;
+        .glass-premium {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
+
+        /* Đèn nhấp nháy */
+        @keyframes led-blink {
+            0%, 100% { opacity: 1; transform: scale(1); filter: brightness(1.2); }
+            50% { opacity: 0.5; transform: scale(0.95); filter: brightness(0.8); }
+        }
+
+        .active-tai-led {
+            border: 2px solid #00f2ff !important;
+            box-shadow: 0 0 20px #00f2ff;
+            animation: led-blink 0.8s infinite;
+            background: rgba(0, 242, 255, 0.2) !important;
+        }
+
+        .active-xiu-led {
+            border: 2px solid #ff0040 !important;
+            box-shadow: 0 0 20px #ff0040;
+            animation: led-blink 0.8s infinite;
+            background: rgba(255, 0, 64, 0.2) !important;
+        }
+
+        #game-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 1; display: none; }
+        #lobby { position: relative; z-index: 10; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle, #1e293b 0%, #020617 100%); }
     </style>
 </head>
 <body>
 
     <div id="lobby">
-        <h1 class="text-3xl font-black text-indigo-500 mb-8 italic">CUTOOLS<span class="text-white">.PRO</span></h1>
-        <div class="w-full max-w-sm space-y-4">
-            <button onclick="goToSite('https://play.betvip.fit/?utm_source=betvip.fit&utm_campaign=betvip.fit&utm_medium=betvip.fit&utm_term=betvip.fit')" class="w-full bg-slate-800 p-5 rounded-2xl flex items-center justify-between border border-white/5 hover:bg-slate-700">
-                <span class="font-bold">BETVIP MD5</span>
-                <i class="fas fa-chevron-right text-indigo-500"></i>
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-black italic text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-600 mb-2">CUTOOLS PRO</h1>
+            <p class="text-slate-500 text-[10px] font-bold tracking-[0.3em] uppercase">Moving Menu & AI Scan</p>
+        </div>
+        
+        <div class="w-full max-w-xs space-y-4">
+            <button onclick="startApp('https://web.betvip.com')" class="w-full bg-slate-900/50 p-6 rounded-3xl border border-white/5 flex items-center justify-between hover:border-blue-500 transition-all group">
+                <span class="font-bold text-slate-300 group-hover:text-blue-400">BETVIP MD5</span>
+                <i class="fas fa-bolt text-blue-500"></i>
             </button>
-            <button onclick="goToSite('https://sum.club')" class="w-full bg-slate-800 p-5 rounded-2xl flex items-center justify-between border border-white/5 hover:bg-slate-700">
-                <span class="font-bold">SUMCLUB</span>
-                <i class="fas fa-chevron-right text-indigo-500"></i>
+            <button onclick="startApp('https://sum.club')" class="w-full bg-slate-900/50 p-6 rounded-3xl border border-white/5 flex items-center justify-between hover:border-purple-500 transition-all group">
+                <span class="font-bold text-slate-300 group-hover:text-purple-400">SUMCLUB</span>
+                <i class="fas fa-fire text-purple-500"></i>
             </button>
-            <p class="text-[10px] text-center text-slate-500 mt-4 uppercase tracking-widest">Hệ thống tự động chèn Menu dự đoán</p>
         </div>
     </div>
 
-    <div id="prediction-overlay">
-        <div class="flex justify-between items-center mb-3">
-            <div class="text-[10px] text-gray-400 font-mono" id="phien-id">PHIÊN: #-------</div>
-            <div class="flex items-center gap-1">
-                <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                <span class="text-[9px] font-bold text-green-500 uppercase">Bot Active</span>
-            </div>
-        </div>
-        <div class="flex gap-3">
-            <div id="box-tai" class="flex-1 py-4 rounded-xl bg-slate-800 border border-white/5 opacity-20 text-center transition-all duration-300">
-                <span class="text-xl font-black text-cyan-400">TÀI</span>
-            </div>
-            <div id="box-xiu" class="flex-1 py-4 rounded-xl bg-slate-800 border border-white/5 opacity-20 text-center transition-all duration-300">
-                <span class="text-xl font-black text-red-500">XỈU</span>
-            </div>
-        </div>
-    </div>
+    <iframe id="game-view"></iframe>
 
-    <button id="back-btn" onclick="location.reload()">THOÁT TOOL</button>
+    <div id="floating-menu" class="glass-premium p-4">
+        <div id="drag-header" class="flex justify-between items-center mb-3 pb-2 border-b border-white/5 cursor-grab active:cursor-grabbing">
+            <i class="fas fa-grip-lines text-slate-600"></i>
+            <span class="text-[9px] font-black text-indigo-400 uppercase">AI Scanner</span>
+            <i class="fas fa-circle text-[6px] text-green-500 animate-pulse"></i>
+        </div>
+
+        <div id="phien-txt" class="text-[9px] text-slate-500 font-mono mb-3 text-center">PHIÊN: #-------</div>
+        
+        <div class="space-y-2">
+            <div id="box-tai" class="py-3 rounded-xl border border-white/5 text-center transition-all duration-300 opacity-20">
+                <span class="text-lg font-black text-cyan-400">TÀI</span>
+            </div>
+            <div id="box-xiu" class="py-3 rounded-xl border border-white/5 text-center transition-all duration-300 opacity-20">
+                <span class="text-lg font-black text-red-500">XỈU</span>
+            </div>
+        </div>
+        
+        <button onclick="location.reload()" class="w-full mt-3 py-1.5 text-[8px] text-slate-600 font-bold uppercase border-t border-white/5">Thoát Tool</button>
+    </div>
 
     <script>
-        // THAY LINK RENDER CỦA BẠN VÀO ĐÂY
+        // KẾT NỐI SERVER RENDER
         const socket = io('https://ten-app-cua-ban.onrender.com');
 
-        function goToSite(url) {
-            // FIX LỖI ĐEN MÀN HÌNH: 
-            // Thay vì dùng iframe, ta điều hướng thẳng trang web sang nhà cái
-            // Nhưng vẫn giữ các phần tử HTML của chúng ta tồn tại (Single Page App)
-            
+        function startApp(url) {
             document.getElementById('lobby').style.display = 'none';
-            document.getElementById('prediction-overlay').style.display = 'block';
-            document.getElementById('back-btn').style.display = 'block';
-
-            // Tạo một "Lớp nền" là nhà cái
-            const siteView = document.createElement('object');
-            siteView.data = url;
-            siteView.type = "text/html";
-            siteView.style.width = "100%";
-            siteView.style.height = "100%";
-            siteView.style.position = "fixed";
-            siteView.style.top = "0";
-            siteView.style.left = "0";
-            siteView.style.zIndex = "1"; // Nằm dưới Menu
-            
-            // Nếu dùng object vẫn bị chặn, dùng phương pháp Redirect và Inject (Cần Server-side)
-            // Tuy nhiên, phương pháp Object thường lách được một số trang bị iframe chặn nhẹ
-            document.body.appendChild(siteView);
-            
-            // Nếu trang web vẫn đen, giải pháp cuối cùng là mở cửa sổ và dùng Menu nổi Web Push
-            // Nhưng ở đây chúng ta ưu tiên hiển thị đè.
+            document.getElementById('game-view').style.display = 'block';
+            document.getElementById('game-view').src = url;
+            document.getElementById('floating-menu').style.display = 'block';
         }
 
+        // Logic kéo thả Menu (Hỗ trợ cả PC và Mobile)
+        const menu = document.getElementById("floating-menu");
+        const header = document.getElementById("drag-header");
+        let active = false;
+        let currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0;
+
+        header.addEventListener("touchstart", dragStart);
+        header.addEventListener("mousedown", dragStart);
+        document.addEventListener("touchend", dragEnd);
+        document.addEventListener("mouseup", dragEnd);
+        document.addEventListener("touchmove", drag);
+        document.addEventListener("mousemove", drag);
+
+        function dragStart(e) {
+            initialX = (e.type === "touchstart" ? e.touches[0].clientX : e.clientX) - xOffset;
+            initialY = (e.type === "touchstart" ? e.touches[0].clientY : e.clientY) - yOffset;
+            if (e.target === header || header.contains(e.target)) active = true;
+        }
+        function dragEnd() { initialX = currentX; initialY = currentY; active = false; }
+        function drag(e) {
+            if (active) {
+                e.preventDefault();
+                currentX = (e.type === "touchmove" ? e.touches[0].clientX : e.clientX) - initialX;
+                currentY = (e.type === "touchmove" ? e.touches[0].clientY : e.clientY) - initialY;
+                xOffset = currentX; yOffset = currentY;
+                menu.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+            }
+        }
+
+        // Nhận kết quả và nhấp nháy đèn
         socket.on('bot_update', (data) => {
-            document.getElementById('phien-id').innerText = `PHIÊN: #${data.phien}`;
+            document.getElementById('phien-txt').innerText = `PHIÊN: #${data.phien}`;
             const tai = document.getElementById('box-tai');
             const xiu = document.getElementById('box-xiu');
 
+            // Reset
+            tai.className = "py-3 rounded-xl border border-white/5 text-center transition-all duration-300 opacity-20";
+            xiu.className = "py-3 rounded-xl border border-white/5 text-center transition-all duration-300 opacity-20";
+
             if(data.duDoan === 'TAI') {
-                tai.classList.add('status-tai');
-                xiu.classList.remove('status-xiu');
+                tai.classList.add('active-tai-led');
+                tai.classList.remove('opacity-20');
             } else {
-                xiu.classList.add('status-xiu');
-                tai.classList.remove('status-tai');
+                xiu.classList.add('active-xiu-led');
+                xiu.classList.remove('opacity-20');
             }
         });
     </script>
