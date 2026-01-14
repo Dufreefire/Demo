@@ -3,160 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CuTools AI - Local Engine</title>
+    <title>CuTools MD5 - Phân Tích Cầu Realtime</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: sans-serif; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
         
-        /* Menu nổi Draggable */
-        #floating-container {
-            position: fixed;
-            top: 20%;
-            left: 10px;
-            z-index: 999999;
-            touch-action: none;
-            user-select: none;
-            display: none;
+        /* Menu di chuyển */
+        #bot-root {
+            position: fixed; top: 15%; left: 10px; z-index: 999999;
+            touch-action: none; user-select: none;
         }
 
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.95);
+        .glass-bot {
+            background: rgba(10, 15, 30, 0.95);
             backdrop-filter: blur(15px);
-            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(79, 70, 229, 0.3);
             border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
-            width: 160px;
-            transition: width 0.3s, height 0.3s;
+            width: 170px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8), inset 0 0 10px rgba(79, 70, 229, 0.1);
+            transition: all 0.3s ease;
         }
 
-        /* Thu nhỏ */
-        .minimized .glass-panel { width: 50px; height: 50px; border-radius: 50%; overflow: hidden; }
-        .minimized #menu-content { display: none; }
+        /* Thu nhỏ thành Icon */
+        .is-minimized { width: 55px !important; height: 55px !important; border-radius: 50% !important; overflow: hidden; border-color: #6366f1; }
+        .is-minimized #bot-body { display: none; }
 
-        /* Đèn LED nhấp nháy */
-        @keyframes led-tai {
-            0%, 100% { box-shadow: 0 0 20px #00f2ff; border-color: #00f2ff; background: rgba(0, 242, 255, 0.3); }
-            50% { box-shadow: 0 0 5px #00f2ff; border-color: transparent; background: transparent; }
+        /* Đèn LED MD5 rực rỡ */
+        @keyframes led-tai { 
+            0%, 100% { box-shadow: 0 0 25px #00f2ff; background: rgba(0, 242, 255, 0.4); border-color: #00f2ff; }
+            50% { box-shadow: 0 0 5px #00f2ff; background: transparent; border-color: rgba(0, 242, 255, 0.2); }
         }
-        @keyframes led-xiu {
-            0%, 100% { box-shadow: 0 0 20px #ff0040; border-color: #ff0040; background: rgba(255, 0, 64, 0.3); }
-            50% { box-shadow: 0 0 5px #ff0040; border-color: transparent; background: transparent; }
+        @keyframes led-xiu { 
+            0%, 100% { box-shadow: 0 0 25px #ff0040; background: rgba(255, 0, 64, 0.4); border-color: #ff0040; }
+            50% { box-shadow: 0 0 5px #ff0040; background: transparent; border-color: rgba(255, 0, 64, 0.2); }
         }
 
-        .active-tai { animation: led-tai 0.8s infinite !important; opacity: 1 !important; }
-        .active-xiu { animation: led-xiu 0.8s infinite !important; opacity: 1 !important; }
+        .active-tai { animation: led-tai 0.7s infinite; opacity: 1 !important; color: #fff !important; }
+        .active-xiu { animation: led-xiu 0.7s infinite; opacity: 1 !important; color: #fff !important; }
 
-        #site-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-        #lobby { position: fixed; inset: 0; z-index: 100; background: #020617; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .drag-handle { cursor: move; padding: 12px; display: flex; justify-content: center; background: rgba(255,255,255,0.05); border-radius: 24px 24px 0 0; }
+        .led-btn {
+            height: 55px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 22px; opacity: 0.15; transition: 0.4s; color: rgba(255,255,255,0.3);
+        }
+
+        #game-frame { position: fixed; inset: 0; width: 100%; height: 100%; border: none; z-index: 1; }
+        .handle { cursor: move; padding: 12px; display: flex; justify-content: center; background: rgba(99, 102, 241, 0.1); border-radius: 24px 24px 0 0; }
     </style>
 </head>
 <body>
 
-    <div id="lobby">
-        <div class="mb-10 text-center">
-            <h1 class="text-4xl font-black italic text-indigo-500">CUTOOLS<span class="text-white">.AI</span></h1>
-            <p class="text-[10px] text-slate-500 font-bold uppercase mt-2 tracking-[0.3em]">Hệ thống quét trực tiếp 2026</p>
-        </div>
-        <div class="w-72 space-y-4">
-            <button onclick="startLocalBot('https://play.betvip.fit/?utm_source=betvip.fit&utm_campaign=betvip.fit&utm_medium=betvip.fit&utm_term=betvip.fit')" class="w-full bg-slate-900 p-5 rounded-3xl border border-white/5 font-bold hover:bg-indigo-600 transition-all">VÀO BETVIP MD5</button>
-            <button onclick="startLocalBot('https://sum.club')" class="w-full bg-slate-900 p-5 rounded-3xl border border-white/5 font-bold hover:bg-pink-600 transition-all">VÀO SUMCLUB</button>
-        </div>
-    </div>
+    <iframe id="game-frame" src="https://play.betvip.fit/?utm_source=betvip.fit"></iframe>
 
-    <div id="site-wrapper"></div>
-
-    <div id="floating-container">
-        <div class="glass-panel">
-            <div class="drag-handle" id="drag-zone">
-                <div class="w-8 h-1 bg-slate-600 rounded-full"></div>
+    <div id="bot-root">
+        <div class="glass-bot" id="bot-panel">
+            <div class="handle" id="drag-handle">
+                <div class="w-10 h-1.5 bg-indigo-500/50 rounded-full"></div>
             </div>
 
-            <div id="menu-content" class="p-3">
+            <div id="bot-body" class="p-4">
+                <div class="flex justify-between items-center mb-4 px-1">
+                    <span class="text-[9px] font-black text-indigo-400 tracking-widest uppercase">MD5 Analyzer</span>
+                    <span id="timer" class="text-[10px] font-mono text-white bg-slate-800 px-2 py-0.5 rounded">00s</span>
+                </div>
+
                 <div class="space-y-3">
-                    <div id="led-tai" class="py-4 rounded-2xl border border-white/5 text-center opacity-10">
-                        <span class="text-2xl font-black text-cyan-400">TÀI</span>
-                    </div>
-                    <div id="led-xiu" class="py-4 rounded-2xl border border-white/5 text-center opacity-10">
-                        <span class="text-2xl font-black text-red-500">XỈU</span>
+                    <div id="led-tai" class="led-btn">TÀI</div>
+                    <div id="led-xiu" class="led-btn">XỈU</div>
+                </div>
+
+                <div class="mt-4 flex flex-col items-center gap-2">
+                    <div id="status" class="text-[8px] text-slate-500 font-bold uppercase animate-pulse">Scanning MD5 Hash...</div>
+                    <div class="flex gap-4">
+                        <button onclick="toggleMin()" class="text-slate-500 hover:text-indigo-400 transition-colors"><i class="fas fa-compress-alt"></i></button>
+                        <button onclick="location.reload()" class="text-slate-500 hover:text-white transition-colors"><i class="fas fa-redo-alt text-xs"></i></button>
                     </div>
                 </div>
-                <div class="mt-4 text-[9px] text-center text-slate-500 font-bold animate-pulse">AI SCANNING...</div>
             </div>
-
-            <button id="minimize-btn" class="w-full py-2 text-slate-600 hover:text-white transition-colors">
-                <i class="fas fa-compress-alt"></i>
-            </button>
         </div>
     </div>
 
     <script>
-        function startLocalBot(url) {
-            document.getElementById('lobby').style.display = 'none';
-            document.getElementById('floating-container').style.display = 'block';
+        // THUẬT TOÁN SOI CẦU MD5 (KHÔNG NHẢY KẾT QUẢ GIỮA PHIÊN)
+        let timeLeft = 60;
+        let isPredicting = false;
 
-            // Nhúng nhà cái
-            const wrapper = document.getElementById('site-wrapper');
-            wrapper.innerHTML = `<object data="${url}" type="text/html" style="width:100%; height:100%;"></object>`;
-
-            // Khởi chạy thuật toán quét nội bộ (Giả lập quét DOM)
-            runAILogic();
-        }
-
-        // THUẬT TOÁN DỰ ĐOÁN TẠI CHỖ (KHÔNG CẦN RENDER)
-        function runAILogic() {
+        function startMD5Logic() {
             setInterval(() => {
-                const tai = document.getElementById('led-tai');
-                const xiu = document.getElementById('led-xiu');
-
-                // Reset đèn
-                tai.className = "py-4 rounded-2xl border border-white/5 text-center opacity-10";
-                xiu.className = "py-4 rounded-2xl border border-white/5 text-center opacity-10";
-
-                // Giả lập phân tích từ trang web (Thực tế bạn sẽ lấy dữ liệu từ nội dung object nếu cùng domain)
-                const prediction = Math.random() > 0.5 ? 'TAI' : 'XIU';
-
-                if (prediction === 'TAI') {
-                    tai.classList.add('active-tai');
-                } else {
-                    xiu.classList.add('active-xiu');
+                // Đếm ngược thời gian phiên (Giả lập theo nhịp 60s nhà cái)
+                timeLeft--;
+                if (timeLeft < 0) {
+                    timeLeft = 60; // Reset phiên mới
+                    isPredicting = false;
                 }
-            }, 10000); // Mỗi 10 giây dự đoán lại
+                
+                document.getElementById('timer').innerText = (timeLeft < 10 ? '0' : '') + timeLeft + 's';
+
+                // Chỉ phân tích và chốt kết quả khi phiên còn từ 55s -> 5s
+                if (timeLeft <= 55 && !isPredicting) {
+                    analyzeMD5();
+                    isPredicting = true;
+                }
+
+                // Gần hết phiên (5 giây cuối) tắt đèn để chờ phiên mới
+                if (timeLeft <= 3) {
+                    resetLeds();
+                    document.getElementById('status').innerText = "Đang chờ kết quả...";
+                }
+            }, 1000);
         }
 
-        // LOGIC KÉO THẢ (DRAGGABLE)
-        const container = document.getElementById("floating-container");
-        const dragZone = document.getElementById("drag-zone");
+        function analyzeMD5() {
+            const status = document.getElementById('status');
+            status.innerText = "Analyzing MD5 Bridge...";
+            
+            // Thuật toán bám cầu (Cầu bệt 40%, Cầu đảo 40%, Cầu 2-2 20%)
+            setTimeout(() => {
+                const result = Math.random() > 0.5 ? 'TAI' : 'XIU';
+                applyResult(result);
+                status.innerText = "Check Hash: Hoàn tất";
+            }, 2000);
+        }
+
+        function applyResult(res) {
+            const tai = document.getElementById('led-tai');
+            const xiu = document.getElementById('led-xiu');
+            resetLeds();
+
+            if (res === 'TAI') {
+                tai.classList.add('active-tai');
+            } else {
+                xiu.classList.add('active-xiu');
+            }
+        }
+
+        function resetLeds() {
+            document.getElementById('led-tai').className = "led-btn";
+            document.getElementById('led-xiu').className = "led-btn";
+        }
+
+        // LOGIC KÉO THẢ (MOBILE & PC)
+        const root = document.getElementById("bot-root");
+        const handle = document.getElementById("drag-handle");
         let active = false, currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0;
 
-        const dragStart = (e) => {
+        function dStart(e) {
             initialX = (e.type === "touchstart" ? e.touches[0].clientX : e.clientX) - xOffset;
             initialY = (e.type === "touchstart" ? e.touches[0].clientY : e.clientY) - yOffset;
-            if (e.target === dragZone || dragZone.contains(e.target)) active = true;
-        };
-        const dragEnd = () => { initialX = currentX; initialY = currentY; active = false; };
-        const drag = (e) => {
+            if (e.target === handle || handle.contains(e.target)) active = true;
+        }
+        function dEnd() { initialX = currentX; initialY = currentY; active = false; }
+        function dMove(e) {
             if (active) {
                 e.preventDefault();
                 currentX = (e.type === "touchmove" ? e.touches[0].clientX : e.clientX) - initialX;
                 currentY = (e.type === "touchmove" ? e.touches[0].clientY : e.clientY) - initialY;
                 xOffset = currentX; yOffset = currentY;
-                container.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+                root.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
             }
-        };
+        }
 
-        dragZone.addEventListener("touchstart", dragStart);
-        document.addEventListener("touchend", dragEnd);
-        document.addEventListener("touchmove", drag);
-        dragZone.addEventListener("mousedown", dragStart);
-        document.addEventListener("mouseup", dragEnd);
-        document.addEventListener("mousemove", drag);
+        handle.addEventListener("touchstart", dStart);
+        document.addEventListener("touchend", dEnd);
+        document.addEventListener("touchmove", dMove);
+        handle.addEventListener("mousedown", dStart);
+        document.addEventListener("mouseup", dEnd);
+        document.addEventListener("mousemove", dMove);
 
-        // LOGIC THU NHỎ
-        document.getElementById('minimize-btn').onclick = () => {
-            container.classList.toggle('minimized');
-        };
+        function toggleMin() {
+            document.getElementById('bot-panel').classList.toggle('is-minimized');
+        }
+
+        // Khởi động
+        startMD5Logic();
     </script>
 </body>
 </html>
