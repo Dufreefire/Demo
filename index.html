@@ -2,185 +2,327 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CuTools MD5 Auto-V6</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOOL BCR F168 - HỆ THỐNG VIP</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Segoe UI', sans-serif; }
-        
-        #bot-ui { position: fixed; top: 15%; left: 15px; z-index: 999999; touch-action: none; }
-        
-        .panel-glow { 
-            background: rgba(8, 10, 15, 0.95); border: 1px solid rgba(99, 102, 241, 0.5);
-            border-radius: 28px; width: 200px; box-shadow: 0 0 40px rgba(79, 70, 229, 0.2);
-            transition: all 0.4s ease;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Goldman:wght@400;700&display=swap');
+        body { background: #000; color: #fff; font-family: 'Goldman', cursive; overflow-x: hidden; }
 
-        .minimized { width: 50px !important; height: 50px !important; border-radius: 50% !important; border: 2px solid #6366f1 !important; }
-        .minimized #content-ui { display: none; }
-        .minimized .mini-bot { display: flex !important; }
+        /* HIỆU ỨNG TIA LAZER */
+        .laser-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+        .laser { position: absolute; width: 2px; height: 100%; background: linear-gradient(to bottom, transparent, #00f7ff, transparent); box-shadow: 0 0 15px #00f7ff; animation: laserMove 5s infinite linear; }
+        @keyframes laserMove { 0% { left: -10%; transform: rotate(10deg); } 100% { left: 110%; transform: rotate(-10deg); } }
 
-        /* Hiệu ứng Đèn LED MD5 */
-        @keyframes neon-tai { 0%, 100% { background: #00f2ff; box-shadow: 0 0 30px #00f2ff; color: #000; } 50% { background: transparent; color: #00f2ff; } }
-        @keyframes neon-xiu { 0%, 100% { background: #ff0040; box-shadow: 0 0 30px #ff0040; color: #000; } 50% { background: transparent; color: #ff0040; } }
-        
-        .active-t { animation: neon-tai 0.6s infinite; opacity: 1 !important; border: none !important; }
-        .active-x { animation: neon-xiu 0.6s infinite; opacity: 1 !important; border: none !important; }
+        /* THÔNG BÁO TRÊN ĐẦU */
+        #top-notice { position: fixed; top: -100px; left: 0; width: 100%; z-index: 9999; transition: 0.5s; padding: 15px; text-align: center; font-weight: bold; font-size: 18px; border-bottom: 2px solid #fff; }
 
-        .led-item { height: 50px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 22px; opacity: 0.1; transition: 0.4s; }
+        /* CẢNH BÁO MẬT KHẨU YẾU */
+        .weak-pass { color: #ff0000; font-size: 12px; animation: flash 0.5s infinite; text-shadow: 0 0 10px red; }
+        @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-        #iframe-bg { position: fixed; inset: 0; width: 100%; height: 100%; border: none; z-index: 1; }
-        .drag-handle { cursor: move; padding: 14px; background: rgba(99, 102, 241, 0.05); border-radius: 28px 28px 0 0; }
+        /* LED NEON CHO 6 GÓI KEY */
+        .key-item { border: 2px solid rgba(255,255,255,0.1); transition: 0.3s; background: rgba(10,10,10,0.8); }
+        .neon-1h { border-color: #00ff88; box-shadow: 0 0 15px #00ff88; color: #00ff88; }
+        .neon-1d { border-color: #00d9ff; box-shadow: 0 0 15px #00d9ff; color: #00d9ff; }
+        .neon-3d { border-color: #ffff00; box-shadow: 0 0 15px #ffff00; color: #ffff00; }
+        .neon-1w { border-color: #ff00ea; box-shadow: 0 0 15px #ff00ea; color: #ff00ea; }
+        .neon-1m { border-color: #ff0055; box-shadow: 0 0 15px #ff0055; color: #ff0055; }
+        .neon-full { border-color: #ffffff; box-shadow: 0 0 20px #ffffff; color: #ffffff; }
+
+        /* HIỆU ỨNG NHẤP NHÁY TRONG TOOL */
+        .dot { width: 40px; height: 40px; border-radius: 50%; display: inline-block; animation: blinker 0.6s infinite alternate; }
+        .dot-con { background: #00ff00; box-shadow: 0 0 20px #00ff00; }
+        .dot-cai { background: #ff0000; box-shadow: 0 0 20px #ff0000; }
+        .dot-hoa { background: #ffff00; box-shadow: 0 0 20px #ffff00; }
+        @keyframes blinker { from { opacity: 1; transform: scale(1); } to { opacity: 0.4; transform: scale(1.2); } }
+
+        /* TOOL MENU DI CHUYỂN */
+        #tool-menu { position: fixed; top: 100px; left: 100px; width: 320px; background: rgba(0,0,0,0.95); border: 2px solid #00f7ff; border-radius: 20px; z-index: 10000; cursor: move; display: none; box-shadow: 0 0 30px #00f7ff; }
+
+        .loader { width: 100%; height: 5px; background: #222; position: relative; overflow: hidden; border-radius: 10px; }
+        .loader-bar { position: absolute; width: 50%; height: 100%; background: #00f7ff; animation: loading 1.5s infinite; }
+        @keyframes loading { 0% { left: -50%; } 100% { left: 100%; } }
     </style>
 </head>
 <body>
 
-    <iframe id="iframe-bg" src="https://play.betvip.fit/?utm_source=betvip.fit"></iframe>
+<div class="laser-container"><div class="laser"></div></div>
+<div id="top-notice"></div>
 
-    <div id="bot-ui">
-        <div class="mini-bot hidden w-full h-full items-center justify-center text-indigo-500 cursor-pointer" onclick="toggleSize()">
-            <i class="fas fa-robot text-2xl"></i>
+<div id="auth-page" class="min-h-screen flex items-center justify-center p-4 relative z-10">
+    <div class="bg-zinc-900/90 p-8 rounded-3xl w-full max-w-md border border-zinc-700 animate__animated animate__backInDown">
+        <h1 class="text-3xl font-black text-center mb-8 text-cyan-500 uppercase italic">Đăng Ký Thuê Tool</h1>
+        <div class="space-y-4">
+            <input type="text" id="reg-fullname" placeholder="Họ và tên" class="w-full bg-black border border-zinc-700 p-4 rounded-xl outline-none">
+            <input type="text" id="reg-username" placeholder="Tên đăng nhập" class="w-full bg-black border border-zinc-700 p-4 rounded-xl outline-none">
+            <input type="text" id="reg-phone" placeholder="Số điện thoại" class="w-full bg-black border border-zinc-700 p-4 rounded-xl outline-none">
+            <input type="email" id="reg-email" placeholder="Gmail" class="w-full bg-black border border-zinc-700 p-4 rounded-xl outline-none">
+            <div>
+                <input type="password" id="reg-pass" oninput="checkPass()" placeholder="Mật khẩu" class="w-full bg-black border border-zinc-700 p-4 rounded-xl outline-none">
+                <p id="pass-alert" class="weak-pass hidden mt-1">CẢNH BÁO: MẬT KHẨU QUÁ YẾU!</p>
+            </div>
+            <input type="password" id="reg-confirm" placeholder="Xác nhận mật khẩu" class="w-full bg-black border border-zinc-700 p-4 rounded-xl outline-none">
+            <div class="flex items-center gap-2 text-sm text-zinc-500">
+                <input type="checkbox" id="terms" checked> <label for="terms">Đồng ý với điều khoản sử dụng</label>
+            </div>
+            <button onclick="handleRegister()" class="w-full bg-cyan-600 hover:bg-cyan-500 py-4 rounded-xl font-bold uppercase transition-all shadow-lg shadow-cyan-900">Đăng Ký Ngay</button>
+        </div>
+    </div>
+</div>
+
+<div id="home-page" class="hidden min-h-screen p-6 relative z-10">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center bg-zinc-900 p-6 rounded-2xl border-b-4 border-cyan-500 mb-8">
+            <div>
+                <h2 class="text-xl font-bold uppercase">Người dùng: <span id="user-name" class="text-cyan-400">---</span></h2>
+                <p class="text-yellow-500 font-mono">Mã Nạp: <span id="id-nap">NAPTIEN8888</span></p>
+            </div>
+            <button onclick="location.reload()" class="bg-red-500 px-4 py-2 rounded-lg font-bold">Đăng xuất</button>
         </div>
 
-        <div class="panel-glow" id="content-ui">
-            <div class="drag-handle" id="drag-zone">
-                <div class="w-12 h-1 bg-indigo-600/50 mx-auto rounded-full"></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            <div class="bg-zinc-900 p-6 rounded-3xl border border-zinc-800">
+                <h3 class="text-xl font-bold mb-6 text-cyan-400">NẠP TIỀN VÀO VÍ</h3>
+                <input type="number" id="nap-amount" placeholder="Nhập số tiền nạp" class="w-full bg-black p-4 rounded-xl border border-zinc-700 mb-4">
+                <button onclick="getQR()" class="w-full bg-green-600 hover:bg-green-500 py-4 rounded-xl font-bold mb-4">LẤY MÃ QR TỰ ĐỘNG</button>
+                
+                <div id="qr-display" class="hidden bg-white p-4 rounded-2xl text-center mb-4 animate__animated animate__fadeIn">
+                    <img id="qr-img" src="" class="mx-auto w-64 border-4 border-black">
+                    <p class="text-black font-bold mt-2">Nội dung: <span id="qr-content" class="text-red-600"></span></p>
+                </div>
+                
+                <button onclick="confirmDeposit()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold">XÁC NHẬN ĐÃ NẠP TIỀN</button>
             </div>
 
-            <div class="p-4">
-                <div class="flex justify-between items-center mb-4">
-                    <div class="flex flex-col">
-                        <span id="phien-num" class="text-[10px] text-indigo-400 font-mono font-bold tracking-tighter">#LOADING...</span>
-                        <div class="flex items-center gap-1">
-                            <span class="w-1 h-1 bg-green-500 rounded-full animate-ping"></span>
-                            <span class="text-[7px] text-green-500 font-bold uppercase">Auto-Sync Active</span>
-                        </div>
-                    </div>
-                    <div id="timer-auto" class="text-2xl font-black text-white italic tracking-tighter">00s</div>
+            <div class="flex flex-col justify-center items-center text-center bg-zinc-900/50 p-6 rounded-3xl border border-dashed border-zinc-700">
+                <p class="text-zinc-400 italic mb-4">Lệnh gửi Admin Duyệt:</p>
+                <div class="p-6 bg-black rounded-2xl border-2 border-cyan-500 w-full font-mono text-cyan-400 text-lg">
+                    DUYET <span id="cmd-id">---</span> <span id="cmd-money">0</span>
                 </div>
+            </div>
+        </div>
 
-                <div id="history-box" class="flex gap-1 mb-4 justify-center"></div>
+        <h2 class="text-3xl font-black text-center mb-10 italic uppercase">Bảng Giá Key Tool BCR F168</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-6 mb-12">
+            <div class="key-item neon-1h p-6 rounded-2xl text-center">
+                <h4 class="font-bold text-xl">KEY 1 GIỜ</h4>
+                <p class="text-4xl font-black my-4">5.000đ</p>
+                <button onclick="buyKey('1 Giờ', 5000)" class="w-full bg-white/10 py-2 rounded-lg border border-current font-bold">MUA NGAY</button>
+            </div>
+            <div class="key-item neon-1d p-6 rounded-2xl text-center">
+                <h4 class="font-bold text-xl">KEY 1 NGÀY</h4>
+                <p class="text-4xl font-black my-4">15.000đ</p>
+                <button onclick="buyKey('1 Ngày', 15000)" class="w-full bg-white/10 py-2 rounded-lg border border-current font-bold">MUA NGAY</button>
+            </div>
+            <div class="key-item neon-3d p-6 rounded-2xl text-center">
+                <h4 class="font-bold text-xl">KEY 3 NGÀY</h4>
+                <p class="text-4xl font-black my-4">38.000đ</p>
+                <button onclick="buyKey('3 Ngày', 38000)" class="w-full bg-white/10 py-2 rounded-lg border border-current font-bold">MUA NGAY</button>
+            </div>
+            <div class="key-item neon-1w p-6 rounded-2xl text-center">
+                <h4 class="font-bold text-xl">KEY 1 TUẦN</h4>
+                <p class="text-4xl font-black my-4">80.000đ</p>
+                <button onclick="buyKey('1 Tuần', 80000)" class="w-full bg-white/10 py-2 rounded-lg border border-current font-bold">MUA NGAY</button>
+            </div>
+            <div class="key-item neon-1m p-6 rounded-2xl text-center">
+                <h4 class="font-bold text-xl">KEY 1 THÁNG</h4>
+                <p class="text-4xl font-black my-4">120.000đ</p>
+                <button onclick="buyKey('1 Tháng', 120000)" class="w-full bg-white/10 py-2 rounded-lg border border-current font-bold">MUA NGAY</button>
+            </div>
+            <div class="key-item neon-full p-6 rounded-2xl text-center">
+                <h4 class="font-bold text-xl">KEY VĨNH VIỄN</h4>
+                <p class="text-4xl font-black my-4">999.000đ</p>
+                <button onclick="buyKey('Trọn Đời', 999000)" class="w-full bg-white/10 py-2 rounded-lg border border-current font-bold">MUA NGAY</button>
+            </div>
+        </div>
 
-                <div id="scan-view" class="py-6 text-center">
-                    <div class="inline-block animate-spin h-5 w-5 border-2 border-indigo-500 border-t-transparent rounded-full mb-2"></div>
-                    <p class="text-[8px] text-slate-500 font-bold uppercase tracking-widest">Đang giải mã chuỗi MD5...</p>
-                </div>
+        <div class="bg-zinc-900 p-8 rounded-3xl border-2 border-cyan-500 shadow-lg shadow-cyan-500/20">
+            <h3 class="text-2xl font-bold text-center mb-6">KÍCH HOẠT TOOL GAME</h3>
+            <div class="max-w-md mx-auto space-y-4">
+                <input type="text" id="tool-key-input" placeholder="Dán mã Key đã mua" class="w-full bg-black p-4 rounded-xl border border-cyan-500 text-center font-mono">
+                <select id="game-type" class="w-full bg-zinc-800 p-4 rounded-xl font-bold">
+                    <option value="F168">HỆ THỐNG F168</option>
+                    <option value="SEXY">CASINO SEXY</option>
+                </select>
+                <button onclick="openTool()" class="w-full bg-cyan-600 py-4 rounded-xl font-black text-xl hover:scale-105 transition">VÀO GAME LUÔN</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-                <div id="result-view" class="hidden grid grid-cols-2 gap-3 mb-4">
-                    <div id="led-t" class="led-item text-cyan-400">TÀI</div>
-                    <div id="led-x" class="led-item text-red-500">XỈU</div>
-                </div>
+<div id="tool-menu">
+    <div class="p-4">
+        <div class="flex justify-between items-center border-b border-cyan-800 pb-2 mb-4">
+            <span class="text-cyan-400 font-bold text-xs">VIP BCR F168</span>
+            <button onclick="this.parentElement.parentElement.parentElement.style.display='none'" class="text-red-500 font-bold">✕</button>
+        </div>
+        
+        <div class="space-y-4">
+            <input type="text" id="table-code" placeholder="Mã bàn (VD: C05)" class="w-full bg-zinc-800 border border-zinc-700 p-2 rounded-lg text-sm text-center outline-none">
+            
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="analyze('CON')" class="bg-green-700 text-white font-bold py-3 rounded-lg text-[10px]">NHẬP TAY CON CŨ</button>
+                <button onclick="analyze('CAI')" class="bg-red-700 text-white font-bold py-3 rounded-lg text-[10px]">NHẬP TAY CÁI CŨ</button>
+            </div>
 
-                <div class="flex justify-between items-center pt-3 border-t border-white/5">
-                    <button onclick="toggleSize()" class="text-slate-600 hover:text-white transition-colors text-xs"><i class="fas fa-compress-alt"></i></button>
-                    <span class="text-[8px] text-slate-700 font-bold">V6.0 AUTO-ENGINE</span>
-                    <button onclick="location.reload()" class="text-slate-600 hover:text-white transition-colors text-xs"><i class="fas fa-sync-alt"></i></button>
+            <div id="loading-view" class="hidden">
+                <p class="text-[10px] text-yellow-500 text-center mb-1 font-bold">HỆ THỐNG ĐANG SOI DỮ LIỆU...</p>
+                <div class="loader"><div class="loader-bar"></div></div>
+            </div>
+
+            <div id="result-box" class="bg-black/90 p-4 rounded-2xl border border-zinc-800 text-center">
+                <p class="text-[10px] text-zinc-500 uppercase">Dự đoán kết quả:</p>
+                <div id="predict-text" class="text-2xl font-black my-2 text-white">CHỜ NHẬP...</div>
+                <div class="flex justify-center gap-4 mt-2">
+                    <div id="dot-con" class="dot dot-con hidden"></div>
+                    <div id="dot-cai" class="dot dot-cai hidden"></div>
+                    <div id="dot-hoa" class="dot dot-hoa hidden"></div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        let countdown = 60;
-        let isChotKèo = false;
-        let lastResult = "";
+<script>
+    // --- CẤU HÌNH BOT & NGÂN HÀNG ---
+    const BOT_CONFIG = {
+        TOKEN: "7823485750:AAH8jM_qD4f0K_oD3z5xP1_Z9g6X-XG-0uY", // Thay Token của bạn
+        ADMIN_ID: "6802107474", // Thay Chat ID Admin của bạn
+        STK: "103886058569",
+        BANK: "VIETINBANK",
+        NAME: "PHAN MINH CHAU"
+    };
 
-        // TỰ ĐỘNG NHẬN DIỆN GIÂY THEO CHU KỲ 60S HỆ THỐNG
-        function autoSyncEngine() {
-            setInterval(() => {
-                const now = new Date();
-                // Tự động khớp giây: Các nhà cái thường reset phiên vào giây thứ 00 của mỗi phút
-                countdown = 60 - now.getSeconds(); 
-                
-                document.getElementById('timer-auto').innerText = (countdown < 10 ? '0' : '') + countdown + 's';
-                document.getElementById('phien-num').innerText = "#MD5_" + (now.getHours() + "" + now.getMinutes() + "" + (now.getFullYear()-2000));
+    // --- TIỆN ÍCH THÔNG BÁO ---
+    function sendAlert(msg, color='#00ff00') {
+        const el = document.getElementById('top-notice');
+        el.innerText = msg;
+        el.style.backgroundColor = color;
+        el.style.top = '0';
+        setTimeout(() => el.style.top = '-100px', 3000);
+    }
 
-                // 1. GIAI ĐOẠN QUÉT (60s -> 35s)
-                if (countdown > 35) {
-                    document.getElementById('scan-view').classList.remove('hidden');
-                    document.getElementById('result-view').classList.add('hidden');
-                    isChotKèo = false;
-                    resetLeds();
-                }
+    // --- KIỂM TRA MẬT KHẨU ---
+    function checkPass() {
+        const p = document.getElementById('reg-pass').value;
+        document.getElementById('pass-alert').style.display = (p.length > 0 && p.length < 8) ? 'block' : 'none';
+    }
 
-                // 2. GIAI ĐOẠN RA KẾT QUẢ (35s -> 11s) - CỐ ĐỊNH 1 BÊN
-                if (countdown <= 35 && countdown > 11) {
-                    if (!isChotKèo) {
-                        showResult();
-                        isChotKèo = true;
-                    }
-                    document.getElementById('scan-view').classList.add('hidden');
-                    document.getElementById('result-view').classList.remove('hidden');
-                }
+    // --- ĐĂNG KÝ VÀ VÀO HOME ---
+    function handleRegister() {
+        const user = document.getElementById('reg-username').value;
+        const name = document.getElementById('reg-fullname').value;
+        if(!user || !name) return sendAlert('Vui lòng điền đủ thông tin!', 'red');
 
-                // 3. GIAI ĐOẠN MỞ BÁT (11s -> 0s)
-                if (countdown <= 11) {
-                    document.getElementById('scan-view').innerHTML = `<p class="text-indigo-400 font-bold text-[10px] animate-pulse">ĐANG MỞ BÁT...</p>`;
-                    document.getElementById('scan-view').classList.remove('hidden');
-                    document.getElementById('result-view').classList.add('hidden');
-                }
-            }, 1000);
+        sendAlert('ĐĂNG KÝ THÀNH CÔNG! CHÀO MỪNG ' + name.toUpperCase());
+        setTimeout(() => {
+            document.getElementById('auth-page').classList.add('hidden');
+            document.getElementById('home-page').classList.remove('hidden');
+            document.getElementById('user-name').innerText = user;
+            const ranID = "NAPTIEN" + Math.floor(1000 + Math.random() * 8999);
+            document.getElementById('id-nap').innerText = ranID;
+            document.getElementById('cmd-id').innerText = ranID;
+        }, 1200);
+    }
+
+    // --- GET QR TỰ ĐỘNG ---
+    function getQR() {
+        const money = document.getElementById('nap-amount').value;
+        const info = document.getElementById('id-nap').innerText;
+        if(!money || money < 5000) return sendAlert('Số tiền tối thiểu 5.000đ', 'red');
+
+        const url = `https://img.vietqr.io/image/${BOT_CONFIG.BANK}-${BOT_CONFIG.STK}-compact.png?amount=${money}&addInfo=${info}&accountName=${BOT_CONFIG.NAME}`;
+        document.getElementById('qr-img').src = url;
+        document.getElementById('qr-content').innerText = info;
+        document.getElementById('cmd-money').innerText = Number(money).toLocaleString();
+        document.getElementById('qr-display').classList.remove('hidden');
+        sendAlert('Đã tạo mã QR nạp tiền!');
+    }
+
+    // --- XÁC NHẬN NẠP GỬI TELEGRAM ---
+    function confirmDeposit() {
+        const money = document.getElementById('nap-amount').value;
+        const id = document.getElementById('id-nap').innerText;
+        const user = document.getElementById('user-name').innerText;
+        if(!money) return sendAlert('Bạn chưa nhập số tiền!', 'red');
+
+        const message = `🔔 YÊU CẦU NẠP TIỀN\n👤 User: ${user}\n🆔 Mã nạp: ${id}\n💰 Số tiền: ${money} VNĐ\n\nLỆNH ADMIN: /duyet_${id}_${money}`;
+        
+        // Gửi tới Telegram Admin
+        fetch(`https://api.telegram.org/bot${BOT_CONFIG.TOKEN}/sendMessage?chat_id=${BOT_CONFIG.ADMIN_ID}&text=${encodeURIComponent(message)}`)
+        .then(() => {
+            sendAlert('Đã gửi thông báo tới Admin! Vui lòng chờ duyệt.');
+        });
+    }
+
+    // --- MUA KEY ---
+    function buyKey(name, price) {
+        if(confirm(`Xác nhận mua gói ${name} với giá ${price}đ?`)) {
+            const key = "TOOLTX-" + Math.random().toString(36).substr(2, 6).toUpperCase();
+            sendAlert(`MUA THÀNH CÔNG! KEY: ${key}`);
+            document.getElementById('tool-key-input').value = key;
         }
+    }
 
-        function showResult() {
-            const tai = document.getElementById('led-t');
-            const xiu = document.getElementById('led-x');
-            const res = Math.random() > 0.5 ? 'T' : 'X';
+    // --- KHỞI CHẠY TOOL MENU ---
+    function openTool() {
+        const key = document.getElementById('tool-key-input').value;
+        if(!key) return sendAlert('Bạn chưa nhập Key!', 'red');
+
+        sendAlert('ĐANG KHỞI CHẠY TOOL OVERLAY...');
+        setTimeout(() => {
+            document.getElementById('tool-menu').style.display = 'block';
+            window.scrollTo(0,0);
+        }, 1500);
+    }
+
+    // --- PHÂN TÍCH KẾT QUẢ ---
+    function analyze(side) {
+        const table = document.getElementById('table-code').value;
+        if(!table) return alert('Vui lòng nhập mã bàn!');
+
+        document.getElementById('loading-view').classList.remove('hidden');
+        document.getElementById('predict-text').innerText = '...';
+        hideDots();
+
+        setTimeout(() => {
+            document.getElementById('loading-view').classList.add('hidden');
+            const res = ['NHÀ CON', 'NHÀ CÁI', 'HOÀ'][Math.floor(Math.random() * 3)];
+            const txtEl = document.getElementById('predict-text');
+            txtEl.innerText = res;
+
+            if(res === 'NHÀ CON') { txtEl.style.color = '#00ff00'; document.getElementById('dot-con').classList.remove('hidden'); }
+            else if(res === 'NHÀ CÁI') { txtEl.style.color = '#ff0000'; document.getElementById('dot-cai').classList.remove('hidden'); }
+            else { txtEl.style.color = '#ffff00'; document.getElementById('dot-hoa').classList.remove('hidden'); }
             
-            if (res === 'T') tai.classList.add('active-t');
-            else xiu.classList.add('active-x');
-            
-            updateHistory(res);
+            sendAlert(`Đã phân tích xong bàn ${table}`);
+        }, 2500);
+    }
+
+    function hideDots() {
+        document.getElementById('dot-con').classList.add('hidden');
+        document.getElementById('dot-cai').classList.add('hidden');
+        document.getElementById('dot-hoa').classList.add('hidden');
+    }
+
+    // --- XỬ LÝ KÉO THẢ MENU TOOL ---
+    const menu = document.getElementById('tool-menu');
+    let isDragging = false, offset = [0,0];
+
+    menu.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        offset = [menu.offsetLeft - e.clientX, menu.offsetTop - e.clientY];
+    });
+    document.addEventListener('mouseup', () => isDragging = false);
+    document.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+            menu.style.left = (e.clientX + offset[0]) + 'px';
+            menu.style.top  = (e.clientY + offset[1]) + 'px';
         }
+    });
+</script>
 
-        function resetLeds() {
-            document.getElementById('led-t').className = "led-item text-cyan-400";
-            document.getElementById('led-x').className = "led-item text-red-500";
-        }
-
-        function updateHistory(res) {
-            const box = document.getElementById('history');
-            const histBox = document.getElementById('history-box');
-            const dot = document.createElement('div');
-            dot.className = `w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-black ${res==='T'?'bg-cyan-500 text-black':'bg-red-500 text-white'}`;
-            dot.innerText = res;
-            if (histBox.children.length > 7) histBox.removeChild(histBox.firstChild);
-            histBox.appendChild(dot);
-        }
-
-        // KÉO THẢ & THU NHỎ
-        const ui = document.getElementById("bot-ui");
-        const drag = document.getElementById("drag-zone");
-        let active = false, cX, cY, iX, iY, xOff = 0, yOff = 0;
-
-        function dStart(e) {
-            iX = (e.type === "touchstart" ? e.touches[0].clientX : e.clientX) - xOff;
-            iY = (e.type === "touchstart" ? e.touches[0].clientY : e.clientY) - yOff;
-            if (e.target === drag || drag.contains(e.target)) active = true;
-        }
-        function dEnd() { iX = cX; iY = cY; active = false; }
-        function dMove(e) {
-            if (active) {
-                e.preventDefault();
-                cX = (e.type === "touchmove" ? e.touches[0].clientX : e.clientX) - iX;
-                cY = (e.type === "touchmove" ? e.touches[0].clientY : e.clientY) - iY;
-                xOff = cX; yOff = cY;
-                ui.style.transform = `translate3d(${cX}px, ${cY}px, 0)`;
-            }
-        }
-        drag.addEventListener("touchstart", dStart);
-        document.addEventListener("touchend", dEnd);
-        document.addEventListener("touchmove", dMove);
-        drag.addEventListener("mousedown", dStart);
-        document.addEventListener("mouseup", dEnd);
-        document.addEventListener("mousemove", dMove);
-
-        function toggleSize() { ui.classList.toggle('minimized'); }
-
-        // Chạy máy chủ tự động
-        autoSyncEngine();
-        ['T','X','X','T','T'].forEach(updateHistory);
-    </script>
 </body>
 </html>
